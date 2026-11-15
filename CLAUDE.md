@@ -8,9 +8,7 @@ Responde siempre en español en este proyecto (instrucción explícita del usuar
 
 ## Estado del proyecto
 
-Juego de Arkanoid/Breakout en etapa temprana. Todavía no hay código del juego, sistema de build, manifiesto de paquetes, linter ni tests: solo assets, un helper de sprites y skills de flujo de trabajo. El directorio aún no es un repositorio git (`/spec-impl` lo requiere, así que hay que ejecutar `git init` antes de usarlo).
-
-El README dice que el juego se desarrolla en Python con Pygame, pero el único código existente (`assets/spritesheet.js`) es JavaScript de navegador con Canvas 2D. El stack objetivo no está definido: confírmalo con el usuario (o con el spec) antes de elegir uno y no asumas Pygame.
+Juego de Arkanoid/Breakout jugable (MVP del spec `01-mvp-arkanoid`). Stack: **JavaScript + Canvas 2D** con scripts planos, sin módulos ES, sin build, sin manifiesto de paquetes, sin linter y sin tests automáticos (la verificación es un checklist manual). Los módulos ES no cargan al abrir `index.html` con `file://`, por eso todo son scripts clásicos que comparten el ámbito global.
 
 ## Estructura del proyecto
 
@@ -18,11 +16,24 @@ El README dice que el juego se desarrolla en Python con Pygame, pero el único c
 .claude/skills/      Skills del proyecto (spec, spec-impl) + README.md con su descripción
 assets/              Recursos del juego (spritesheet, sprites en JS, sonidos)
 specs/               Specs NN-slug.md y .spec-config.yml (los genera /spec)
+src/                 Código del juego (scripts planos)
+  settings.js          Constantes: canvas 640x720, vidas, puntos, BALL_SPEED, GRID, ROW_COLORS
+  entities.js          Fábricas y utilidades: createPaddle, createBall, createBlocks, clampPaddle
+  game.js              Estado, entrada, colisiones, sonido, dibujo y bucle principal
+index.html           Página del juego: canvas y carga ordenada de scripts
 CLAUDE.md            Esta guía
-README.md            Descripción general (en español)
+README.md            Cómo jugar y controles (en español)
 ```
 
-Cuando exista código del juego, colócalo en un directorio propio (p. ej. `src/`) y actualiza esta sección junto con los comandos de ejecución y pruebas.
+## Cómo ejecutar
+
+Abre `index.html` con doble clic; no hay servidor ni instalación. El orden de los `<script>` importa: `assets/spritesheet.js`, `src/settings.js`, `src/entities.js`, `src/game.js`. El bucle de juego arranca dentro del callback de `loadSpritesheet`, cuando el atlas ya está cargado. No hay comando de pruebas: se verifica a mano con los criterios de aceptación del spec.
+
+## Código del juego (`src/`)
+
+- `game.js` mantiene `state` (`mode`: `'ready' | 'playing' | 'gameover' | 'won'`, `score`, `lives`) y las entidades `paddle`, `ball`, `blocks` y `explosions`. Las velocidades están en px/frame y la pelota usa su centro como posición; las explosiones avanzan con `dt` en ms.
+- Espacio o clic (`handleAction`) lanza la pelota o, en Game Over y victoria, reinicia la partida.
+- Los sonidos se reproducen clonando el elemento `Audio`, y solo después de la primera interacción (lanzar la pelota) por la política de autoplay de los navegadores.
 
 ## Assets (`assets/`)
 
